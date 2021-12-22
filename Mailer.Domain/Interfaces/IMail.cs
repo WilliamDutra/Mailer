@@ -1,4 +1,5 @@
 ﻿using Mailer.Model.Entidades;
+using Mailer.Model.ValueObjects;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -7,11 +8,11 @@ namespace Mailer.Domain.Interfaces
 {
     public interface IMail
     {
-        bool Enviar(string Para, string Assunto, string Corpo);
+        RetornoDoEnvioDoEmail Enviar(string Para, string Assunto, string Corpo);
 
-        bool EnviarComAnexo(string Para, string Assunto, string Corpo, string Anexo, bool Html);
+        RetornoDoEnvioDoEmail EnviarComAnexo(string Para, string Assunto, string Corpo, string Anexo, bool Html);
 
-        bool EnviarComHTML(string Para, string Assunto, string Corpo);
+        RetornoDoEnvioDoEmail EnviarComHTML(string Para, string Assunto, string Corpo);
 
         List<Mensagem> LerCaixaDeEntrada();
 

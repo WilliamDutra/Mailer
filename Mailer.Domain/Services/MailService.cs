@@ -1,5 +1,6 @@
 ﻿using Mailer.Domain.Interfaces;
 using Mailer.Model.Entidades;
+using Mailer.Model.ValueObjects;
 using OpenPop.Mime;
 using OpenPop.Pop3;
 using System;
@@ -24,7 +25,7 @@ namespace Mailer.Domain.Services
 
         private int _Porta;
 
-        public MailService(string Email, string Senha, string Dominio, int Porta) 
+        public MailService(string Email, string Senha, string Dominio, int Porta)
         {
             _Email = Email;
             _Senha = Senha;
@@ -32,80 +33,65 @@ namespace Mailer.Domain.Services
             _Porta = Porta;
         }
 
-        public bool Enviar(string Para, string Assunto, string Corpo)
+        /// <summary>
+        /// Método que efetuada o dispardo de e-mail
+        /// </summary>
+        /// <param name="Para">E-mail do destinatário</param>
+        /// <param name="Assunto">Assunto do e-mail</param>
+        /// <param name="Corpo">Corpo/Mensagem do e-mail</param>
+        /// <returns></returns>
+        public RetornoDoEnvioDoEmail Enviar(string Para, string Assunto, string Corpo)
         {
-            bool retorno = false;
-
             try
             {
-                ExecutarEnvio(Para, Assunto, Corpo);
-
-                retorno = true;
+                return ExecutarEnvio(Para, Assunto, Corpo);
             }
             catch (Exception)
             {
+                throw;
 
-                return false;
             }
-
-            return retorno;
         }
 
-        public bool EnviarComAnexo(string Para, string Assunto, string Corpo, string Arquivo, bool Html = false)
+        /// <summary>
+        /// Método que efetuada o dispardo de e-mail com um anexo
+        /// </summary>
+        /// <param name="Para">E-mail do destinatário</param>
+        /// <param name="Assunto">Assunto do e-mail</param>
+        /// <param name="Corpo">Corpo/Mensagem do e-mail</param>
+        /// <param name="Arquivo">Caminho do arquivo que deseja anexar</param>
+        /// <param name="Html">O corpo do e-mail contém algum HTML</param>
+        /// <returns></returns>
+        public RetornoDoEnvioDoEmail EnviarComAnexo(string Para, string Assunto, string Corpo, string Arquivo, bool Html = false)
         {
-            bool retorno = false;
-
             try
             {
-                //_Smtp = new SmtpClient();
-                //_Smtp.EnableSsl = true;
-                //_Smtp.Host = _Dominio;
-                //_Smtp.UseDefaultCredentials = false;
-                //_Smtp.Credentials = new System.Net.NetworkCredential(_Email, _Senha);
-                //_Smtp.TargetName = "STARTTLS/smtp.office365.com";
-                //_Smtp.Port = _Porta;
-                //_Smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
-
-                //Attachment Anexo = new Attachment(Arquivo);
-
-                //MailMessage message = new MailMessage(_Email, Para);
-                //message.Subject = Assunto;
-                //message.Body = Corpo;
-                //message.Attachments.Add(Anexo);
-
-                //_Smtp.Send(message);
-
-                ExecutarEnvio(Para, Assunto, Corpo, Arquivo, Html);
-
+                return ExecutarEnvio(Para, Assunto, Corpo, Arquivo, Html);
             }
             catch (Exception)
             {
 
                 throw;
             }
-
-            return retorno;
         }
 
-        public bool EnviarComHTML(string Para, string Assunto, string Corpo)
+        /// <summary>
+        /// Método que efetuada o dispardo de e-mail com um anexo
+        /// </summary>
+        /// <param name="Para">E-mail do destinatário</param>
+        /// <param name="Assunto">Assunto do e-mail</param>
+        /// <param name="Corpo">Corpo/Mensagem do e-mail</param>
+        /// <returns></returns>
+        public RetornoDoEnvioDoEmail EnviarComHTML(string Para, string Assunto, string Corpo)
         {
-            bool retorno = false;
-
             try
             {
-               
-                ExecutarEnvio(Para, Assunto, Corpo, null, true);
-
-                retorno = true;
+                return ExecutarEnvio(Para, Assunto, Corpo, null, true);
             }
             catch (Exception)
             {
-
-                retorno = false;
+                throw;
             }
-
-            return retorno;
-
         }
 
         public List<Mensagem> LerCaixaDeEntrada()
@@ -150,9 +136,9 @@ namespace Mailer.Domain.Services
             }
         }
 
-        private bool ExecutarEnvio(string Para, string Assunto, string Corpo, string Anexo = null, bool Html = false)
+        private RetornoDoEnvioDoEmail ExecutarEnvio(string Para, string Assunto, string Corpo, string Anexo = null, bool Html = false)
         {
-            bool retorno = false;
+            var retorno = new RetornoDoEnvioDoEmail();
 
             try
             {
@@ -166,8 +152,8 @@ namespace Mailer.Domain.Services
                 _Smtp.EnableSsl = true;
                 _Smtp.Host = _Dominio;
                 _Smtp.UseDefaultCredentials = false;
-                _Smtp.Credentials = new System.Net.NetworkCredential(_Email, _Senha);
-                _Smtp.TargetName = "STARTTLS/smtp.office365.com";
+                _Smtp.Credentials = new NetworkCredential(_Email, _Senha);
+                //_Smtp.TargetName = "STARTTLS/smtp.office365.com";
                 _Smtp.Port = _Porta;
                 _Smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
 
@@ -180,13 +166,15 @@ namespace Mailer.Domain.Services
 
                 _Smtp.Send(message);
 
-                retorno = true;
+                retorno.Sucesso = true;
+                retorno.Mensagem = "E-mail enviado com sucesso!";
 
             }
             catch (Exception ex)
             {
-
-                retorno = false;
+                retorno.Sucesso = false;
+                retorno.Mensagem = "Houve um erro ao enviar o e-mail!";
+                retorno.Excecao = ex;
             }
 
             return retorno;
