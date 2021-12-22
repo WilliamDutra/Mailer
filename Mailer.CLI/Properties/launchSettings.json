@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "Mailer.CLI": {
+      "commandName": "Project"
+    }
+  }
+}
